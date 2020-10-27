@@ -112,7 +112,8 @@
 
      return {
        device_type: user_data,
-       location: location
+       location: location,
+       ip: ip 
      };
     
    }
