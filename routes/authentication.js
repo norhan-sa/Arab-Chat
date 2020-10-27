@@ -1,7 +1,11 @@
  
- const router   =   require('express').Router();
- const Members  =   require('../models/members');
- const bcrypt   =   require('bcrypt');
+ const  router     =   require('express').Router();
+ const  Members    =   require('../models/members');
+ const request_ip  =   require('request-ip');
+ const   ipapi     =   require('ipapi.co');
+ const  bcrypt     =   require('bcrypt');
+ const DeviceDetector = require('node-device-detector');
+ const detector = new DeviceDetector;
 
  // R E G E S T R A T I O N
 
@@ -22,7 +26,10 @@
    let member = new Members({name: name , password: hashedPass});
    member.save();
 
-   return res.send({msg:'تم التسجيل العضو بنجاح', data: {name: name}, status:'200'});
+   let data = await getUserData(req);
+   data.name = name;
+
+   return res.send({msg:'تم التسجيل العضو بنجاح', data: data, status:'200'});
 
   }catch(err){
 
@@ -49,7 +56,10 @@
 
      if(!result) return res.status(400).send({msg:'أنت مخطئ في كلمة المرور' , data: null , status:'400'});
 
-     return res.send({msg:'تم تسجيل الدخول بنجاح', data:{name:name} ,status:200});
+     let data = await getUserData(req);
+     data.name = name;
+
+     return res.send({msg:'تم تسجيل الدخول بنجاح', data:data ,status:200});
      
    }catch(err){
 
@@ -72,7 +82,10 @@
       let isMember = await Members.findOne({name: name});
       if( isMember ) return res.status(400).send({msg:'يرجى اختيار اسم آخر' , data:null , status:'400'});
 
-      return res.send({msg:'تم دخول الزائر بنجاح', data:null , status:'200'});
+      let data = await getUserData(req);
+      data.name = name;
+
+      return res.send({msg:'تم دخول الزائر بنجاح', data:data , status:'200'});
 
     }catch(err){
 
@@ -85,20 +98,23 @@
 
 
    async function getUserData(req){
+
      let userAgent = req.headers['user-agent'];  
      let result = detector.detect(userAgent);   
      let user_data = ''+result.os.name+' - '+result.client.type+' - '+result.client.name;
 
-     let promise = new Promise(resolve=>{
+     let ip = request_ip.getClientIp(req)+"" ;
+     let promise = new Promise(  resolve=>{ ipapi.location((res) => resolve(res) , ip);}  );
+     let location = await promise;
+   
+     if( location.hasOwnProperty("country_name")) location = location.country_name+" "+location.city;
+     else location = "unknown";
 
-          ipapi.location(function(res){
-           resolve(res);
-          }, ip);
-       
-      });
-
-
-
+     return {
+       device_type: user_data,
+       location: location
+     };
+    
    }
 
  module.exports = router;
