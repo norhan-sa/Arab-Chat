@@ -7,7 +7,7 @@
 
  mongoose.connect(`mongodb+srv://${username}:${password}@cluster0.q4jii.mongodb.net/<dbname>?retryWrites=true&w=majority` ,
   { useNewUrlParser: true ,  useUnifiedTopology: true} , (err,res)=>{
-            if(err) console.log(`database connection error`);
+            if(err) console.log(`database connection error` , err.stack);
             else console.log(`Connected to the database`);
           }
  );
