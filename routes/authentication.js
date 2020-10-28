@@ -1,11 +1,19 @@
- 
- const  router     =   require('express').Router();
- const  Members    =   require('../models/members');
- const request_ip  =   require('request-ip');
- const   ipapi     =   require('ipapi.co');
- const  bcrypt     =   require('bcrypt');
- const DeviceDetector = require('node-device-detector');
- const detector = new DeviceDetector;
+ const   router       =   require('express').Router();
+ const   Members      =   require('../models/members');
+ const  request_ip    =   require('request-ip');
+ const    ipapi       =   require('ipapi.co');
+ const    bcrypt      =   require('bcrypt');
+ const DeviceDetector =   require('node-device-detector');
+ const   detector     =   new DeviceDetector;
+
+ let roles   =  [
+   'rooms',
+   'block',
+   'mute',
+   'room_kick',
+   'chat_kick',
+   'role'
+ ];
 
  // R E G E S T R A T I O N
 
@@ -23,12 +31,14 @@
    let salt = await bcrypt.genSalt(10);
    let hashedPass = await bcrypt.hash(password,salt);
 
-   let member = new Members({name: name , password: hashedPass});
-   member.save();
+   let member = new Members({name: name , password: hashedPass , roles: []});
+   let user = await member.save();
+
+   req.session.id = user._id;
 
    let data = await getUserData(req);
    data.name = name;
-
+   
    return res.send({msg:'تم التسجيل العضو بنجاح', data: data, status:'200'});
 
   }catch(err){
@@ -58,6 +68,9 @@
 
      let data = await getUserData(req);
      data.name = name;
+     data.roles = user.roles;
+     
+     req.session.id = user._id;
 
      return res.send({msg:'تم تسجيل الدخول بنجاح', data:data ,status:200});
      
@@ -68,7 +81,8 @@
 
    }
  });
-   //ـــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ
+
+   //ــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ
    
    // V I S I T O R
 
@@ -97,6 +111,8 @@
    });
 
 
+   // G E T   U S E R   D A T A   F R O M   R E Q U E S T
+
    async function getUserData(req){
 
      let userAgent = req.headers['user-agent'];  
@@ -106,13 +122,20 @@
      let ip = request_ip.getClientIp(req)+"" ;
      let promise = new Promise(  resolve=>{ ipapi.location((res) => resolve(res) , ip);}  );
      let location = await promise;
+     let country , city;
    
-     if( location.hasOwnProperty("country_name")) location = location.country_name+" "+location.city;
-     else location = "unknown";
+     if( location.hasOwnProperty("country_name")){
+      country = location.country_name; 
+      city = location.city;
+     }else {
+      country = "Unknown"; 
+      city = "Unknown";       
+     }
 
      return {
        device_type: user_data,
-       location: location,
+       country: location.country_name,
+       city: location.city,
        ip: ip 
      };
     

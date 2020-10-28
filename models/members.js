@@ -1,3 +1,4 @@
+
  const mongoose    =   require('mongoose');
  const { Schema }  =   mongoose;
 
@@ -19,6 +20,9 @@
    },
    pic: {
       type: String       
+   },
+   roles: {
+      type: Array
    } 
  });
 
