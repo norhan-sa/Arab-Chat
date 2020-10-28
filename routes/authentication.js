@@ -34,7 +34,7 @@
    let member = new Members({name: name , password: hashedPass , roles: []});
    let user = await member.save();
 
-   req.session.id = user._id;
+   req.session.name = user.name;
 
    let data = await getUserData(req);
    data.name = name;
@@ -70,7 +70,7 @@
      data.name = name;
      data.roles = user.roles;
      
-     req.session.id = user._id;
+     req.session.name = user.name;
 
      return res.send({msg:'تم تسجيل الدخول بنجاح', data:data ,status:200});
      

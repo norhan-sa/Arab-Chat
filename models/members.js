@@ -4,10 +4,13 @@
 
  const users_schema = new Schema({
    name:{
-     type: String          
+     type: String,
+     unique : true,
+     required : true           
    },
    password: {
-     type: String        
+     type: String,
+     required : true        
    },
    role: {
       type: String       

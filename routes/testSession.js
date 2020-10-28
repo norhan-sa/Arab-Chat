@@ -9,7 +9,7 @@ route.post('/test',(req,res)=>{
 });
 
 route.get('/test1',(req,res)=>{
-    let name = req.session.id;
+    let name = req.session.name;
     return res.send(name);
 });
 
