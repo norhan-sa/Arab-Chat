@@ -116,6 +116,7 @@
    async function getUserData(req){
 
      let userAgent = req.headers['user-agent'];  
+     console.log(userAgent);
      let result = detector.detect(userAgent);   
      let user_data = ''+result.os.name+' - '+result.client.type+' - '+result.client.name;
 

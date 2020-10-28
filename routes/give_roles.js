@@ -9,7 +9,6 @@
   if(!name) return res.status(400).send({msg:'ليس لديك صلاحية', data:null , status:'400'});
 
   try{
-    console.log(name);
     let user = await Members.findOne({name: name}); 
     
     let have_role = user.roles.includes("role");
