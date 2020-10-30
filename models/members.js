@@ -28,9 +28,6 @@
    pic: {
       type: String       
    },
-   roles: {
-      type: Array
-   },
    sub_name: {
       type: String,
    },

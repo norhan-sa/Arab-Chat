@@ -41,7 +41,8 @@
    let member = new Members({name: name , decoration: name , password: hashedPass , last_ip: data.ip , last_device: data.device_type , last_login: new Date() , reg_date: new Date()});
    member.save().catch((err)=>console.log(err.stack));
 
-   
+   insertToLogs('تسجيل عضوية', data);
+
    return res.send({msg:'تم التسجيل العضو بنجاح', data: data, status:'200'});
 
   }catch(err){
@@ -79,6 +80,8 @@
      Members.updateOne({id: user.id},{ last_ip: data.ip , last_device: data.device_type , last_login: new Date() })
      .catch((err)=>console.log(err.stack));
 
+     insertToLogs('دخول العضو', data);
+
      return res.send({msg:'تم تسجيل الدخول بنجاح', data:data ,status:200});
      
    }catch(err){
@@ -106,6 +109,8 @@
       let data = await getUserData(req);
       data.name = name;
 
+      insertToLogs('دخول الزائر', data);
+
       return res.send({msg:'تم دخول الزائر بنجاح', data:data , status:'200'});
 
     }catch(err){
@@ -130,20 +135,23 @@
      let ip = request_ip.getClientIp(req)+"" ;
      let promise = new Promise(  resolve=>{ ipapi.location((res) => resolve(res) , ip);}  );
      let location = await promise;
-     let country , city;
+     let country , city , code;
    
      if( location.hasOwnProperty("country_name")){
       country = location.country_name; 
       city = location.city;
+      code = location.country_code
      }else {
       country = "Unknown"; 
-      city = "Unknown";       
+      city = "Unknown";  
+      code = "UnKnown";     
      }
-     console.log(location);
+
      return {
        device_type: user_data,
-       country: location.country_name,
-       city: location.city,
+       country: country,
+       city: city,
+       code: code,
        ip: ip 
      };
     
@@ -156,7 +164,7 @@
        decoration: data.decoration,
        ip: data.ip,
        device_type: data.device_type,
-       country: data.country,
+       country: data.code,
        date: new Date(),
        source: null,
        invite: null,       
