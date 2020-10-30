@@ -14,7 +14,7 @@ route.get('/test1',(req,res)=>{
   let userAgent = req.headers['user-agent'];  
   console.log(userAgent);
   let result = detector.detect(userAgent);   
-  let user_data = ''+result.os.name+' - '+result.client.type+' - '+result.client.name;
+  let user_data = ''+result.os.name+' '+result.os.platform+' - '+result.client.type+' - '+result.client.name;
 
   return res.send(user_data);
 });

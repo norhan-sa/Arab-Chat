@@ -1,10 +1,11 @@
- const   router       =   require('express').Router();
- const   Members      =   require('../models/members');
- const  request_ip    =   require('request-ip');
- const    ipapi       =   require('ipapi.co');
- const    bcrypt      =   require('bcrypt');
- const DeviceDetector =   require('node-device-detector');
- const   detector     =   new DeviceDetector;
+ const   router       =    require('express').Router();
+ const   Members      =    require('../models/members');
+ const    Logs        =    require('../models/logs');
+ const  request_ip    =    require('request-ip');
+ const    ipapi       =    require('ipapi.co');
+ const    bcrypt      =    require('bcrypt');
+ const DeviceDetector =    require('node-device-detector');
+ const   detector     =    new DeviceDetector;
 
  let roles   =  [
    'rooms',
@@ -31,13 +32,15 @@
    let salt = await bcrypt.genSalt(10);
    let hashedPass = await bcrypt.hash(password,salt);
 
-   let member = new Members({name: name , password: hashedPass , roles: []});
-   let user = await member.save();
-
-   req.session.name = user.name;
+   req.session.name = name;
 
    let data = await getUserData(req);
    data.name = name;
+   data.decoration = name;
+
+   let member = new Members({name: name , decoration: name , password: hashedPass , last_ip: data.ip , last_device: data.device_type , last_login: new Date() , reg_date: new Date()});
+   member.save().catch((err)=>console.log(err.stack));
+
    
    return res.send({msg:'تم التسجيل العضو بنجاح', data: data, status:'200'});
 
@@ -66,11 +69,15 @@
 
      if(!result) return res.status(400).send({msg:'أنت مخطئ في كلمة المرور' , data: null , status:'400'});
 
+     req.session.name = user.name;
+
      let data = await getUserData(req);
      data.name = name;
-     data.roles = user.roles;
+     data.decoration = user.decoration;
+     data.id = user.id;
      
-     req.session.name = user.name;
+     Members.updateOne({id: user.id},{ last_ip: data.ip , last_device: data.device_type , last_login: new Date() })
+     .catch((err)=>console.log(err.stack));
 
      return res.send({msg:'تم تسجيل الدخول بنجاح', data:data ,status:200});
      
@@ -118,7 +125,7 @@
      let userAgent = req.headers['user-agent'];  
      console.log(userAgent);
      let result = detector.detect(userAgent);   
-     let user_data = ''+result.os.name+' - '+result.client.type+' - '+result.client.name;
+     let user_data = ''+result.os.name+' '+result.os.platform+' - '+result.client.type+' - '+result.client.name;
 
      let ip = request_ip.getClientIp(req)+"" ;
      let promise = new Promise(  resolve=>{ ipapi.location((res) => resolve(res) , ip);}  );
@@ -132,7 +139,7 @@
       country = "Unknown"; 
       city = "Unknown";       
      }
-
+     console.log(location);
      return {
        device_type: user_data,
        country: location.country_name,
@@ -140,6 +147,21 @@
        ip: ip 
      };
     
+   }
+
+   function insertToLogs(type , data){
+     let log  = new Logs({
+       type: type,
+       name: data.name,
+       decoration: data.decoration,
+       ip: data.ip,
+       device_type: data.device_type,
+       country: data.country,
+       date: new Date(),
+       source: null,
+       invite: null,       
+     });
+     log.save().catch((err)=>console.log(err.stack));
    }
 
  module.exports = router;
