@@ -22,18 +22,12 @@
    muted: {
       type: Boolean      
    },
-   blocked: {
-      type: Boolean       
-   },
    pic: {
       type: String       
    },
-   sub_name: {
-      type: String,
-   },
-   sub_value: {
-      type: Number,
-      max: 9000
+   sub: {
+      type: Schema.Types.ObjectId,
+      ref: 'Subscriptions'
    },
    last_ip:{
       type: String

@@ -1,20 +1,13 @@
  const   router       =    require('express').Router();
  const   Members      =    require('../models/members');
  const    Logs        =    require('../models/logs');
+ const   Blocks       =    require('../models/blockList');
+ const  Subscription  =    require('../models/subscriptions');
  const  request_ip    =    require('request-ip');
  const    ipapi       =    require('ipapi.co');
  const    bcrypt      =    require('bcrypt');
  const DeviceDetector =    require('node-device-detector');
  const   detector     =    new DeviceDetector;
-
- let roles   =  [
-   'rooms',
-   'block',
-   'mute',
-   'room_kick',
-   'chat_kick',
-   'role'
- ];
 
  // R E G E S T R A T I O N
 
@@ -22,11 +15,20 @@
    
   try{
 
-   let {name , password} = req.body;
-  
-   if(!name || !password) return res.status(400).send({msg:"الرجاء التحقق من البيانات المدخلة" ,data:null ,status:'400'});
+   let {name , password , device_id} = req.body;
+   if(!name || !password || !device_id) return res.status(400).send({msg:"الرجاء التحقق من البيانات المدخلة" ,data:null ,status:'400'}); 
 
-   let isMember = await Members.findOne({name: name});
+   let data = await getUserData(req);
+   data.info.name = name;
+   data.info.decoration = name;
+
+   let is_blocked  = await Blocks.find({$or:[{ip: data.ip},{device_id: device_id},{country_code: data.code},{os: data.os},{browser: data.browser}]});
+   if(is_blocked.length != 0) {
+    insertToLogs('محظور يحاول التسجيل	', data); 
+    return res.status(400).send({msg:'تم حظرك من الدردشة', data:null , status:'400'});
+   }
+
+   let isMember = await Members.findOne({$or: [{name: name},{decoration: name}]});
    if( isMember ) return res.status(400).send({msg:"هذا الاسم مسجل من قبل", data:null, satus:"400"});
 
    let salt = await bcrypt.genSalt(10);
@@ -34,16 +36,13 @@
 
    req.session.name = name;
 
-   let data = await getUserData(req);
-   data.name = name;
-   data.decoration = name;
+   let member = new Members({name: name , decoration: name, password: hashedPass , last_ip: data.ip , last_device: data.device_type , last_login: new Date() , reg_date: new Date()});
+   let save_user = await member.save()
+   data.info.id =  save_user.id;
 
-   let member = new Members({name: name , decoration: name , password: hashedPass , last_ip: data.ip , last_device: data.device_type , last_login: new Date() , reg_date: new Date()});
-   member.save().catch((err)=>console.log(err.stack));
+   insertToLogs('تسجيل عضوية', data.info);
 
-   insertToLogs('تسجيل عضوية', data);
-
-   return res.send({msg:'تم التسجيل العضو بنجاح', data: data, status:'200'});
+   return res.send({msg:'تم تسجيل العضو بنجاح', data: data.info, status:'200'});
 
   }catch(err){
 
@@ -53,36 +52,47 @@
   }
  });
 
- //ـــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ
+ //ـــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ]
 
  // L O G  I N
 
  router.post('/login', async(req,res)=>{
    
-   let {name , password} = req.body;
    
    try{
+     
+     let {name , password , device_id} = req.body;
+     if(!name || !password || !device_id) return res.status(400).send({msg:"الرجاء التحقق من البيانات المدخلة" ,data:null ,status:'400'});
 
-     let user  =  await Members.findOne({name: name});
+     let user  =  await Members.findOne({name: name}).populate('sub');
      if( !user ) return res.status(400).send({msg:'أنت مخطئ في اسم المستخدم', data:null , status:'400'});
 
-     let result = await bcrypt.compare(password , user.password);
+     let data = await getUserData(req);
+     data.info.name = name;
+     data.info.decoration = user.decoration;
+     data.info.id = user.id;
 
+     let is_blocked  = await Blocks.find({$or:[{ip: data.ip},{device_id: device_id},{country_code: data.code},{os: data.os},{browser: data.browser}]});
+     if(is_blocked.length != 0) {
+       insertToLogs('عضو محظور', data); 
+       return res.status(400).send({msg:'تم حظرك من الدردشة', data:null , status:'400'});
+     }
+
+     let result = await bcrypt.compare(password , user.password);
      if(!result) return res.status(400).send({msg:'أنت مخطئ في كلمة المرور' , data: null , status:'400'});
 
      req.session.name = user.name;
 
-     let data = await getUserData(req);
-     data.name = name;
-     data.decoration = user.decoration;
-     data.id = user.id;
-     
-     Members.updateOne({id: user.id},{ last_ip: data.ip , last_device: data.device_type , last_login: new Date() })
+     let roles = null;
+     if(user.sub) roles = user.sub.roles;
+     data.info.roles = roles;
+
+     Members.findOneAndUpdate({id: user.id},{ last_ip: data.ip , last_device: data.device_type , last_login: new Date() })
      .catch((err)=>console.log(err.stack));
 
-     insertToLogs('دخول العضو', data);
+     insertToLogs('دخول العضو', data.info);
 
-     return res.send({msg:'تم تسجيل الدخول بنجاح', data:data ,status:200});
+     return res.send({msg:'تم تسجيل الدخول بنجاح', data:data.info ,status:200});
      
    }catch(err){
 
@@ -100,18 +110,24 @@
 
      try{
 
-      let {name}  = req.body;    
-      if( !name ) return res.satus(400).send({msg:'الرجاء التحقق من البيانات', data:null , status:'400'}); 
-      
-      let isMember = await Members.findOne({name: name});
-      if( isMember ) return res.status(400).send({msg:'يرجى اختيار اسم آخر' , data:null , status:'400'});
+      let {name , device_id} = req.body;
+      if(!name || !device_id) return res.status(400).send({msg:"الرجاء التحقق من البيانات المدخلة" ,data:null ,status:'400'});
+   
+      let isMember = await Members.findOne({$or: [{name: name},{decoration: name}]});
+      if( isMember ) return res.status(400).send({msg:'هذا الإسم مسجل من قبل' , data:null , status:'400'});
 
       let data = await getUserData(req);
-      data.name = name;
+      data.info.name = name;
 
-      insertToLogs('دخول الزائر', data);
+      let is_blocked  = await Blocks.find({$or:[{ip: data.ip},{device_id: device_id},{country_code: data.code},{os: data.os},{browser: data.browser}]});
+      if(is_blocked.length != 0) {
+       insertToLogs('زائر محظور', data.info); 
+       return res.status(400).send({msg:'تم حظرك من الدردشة', data:null , status:'400'});
+      }
 
-      return res.send({msg:'تم دخول الزائر بنجاح', data:data , status:'200'});
+      insertToLogs('دخول الزائر', data.info);
+
+      return res.send({msg:'تم دخول الزائر بنجاح', data:data.info , status:'200'});
 
     }catch(err){
 
@@ -121,7 +137,6 @@
     }
 
    });
-
 
    // G E T   U S E R   D A T A   F R O M   R E Q U E S T
 
@@ -147,15 +162,21 @@
       code = "UnKnown";     
      }
 
-     return {
-       device_type: user_data,
-       country: country,
-       city: city,
-       code: code,
-       ip: ip 
-     };
-    
+     let data = {
+       info: {
+        device_type: user_data,
+        country: country,
+        city: city,
+        code: code,
+        ip: ip 
+      },
+      os: result.os.name,
+      browser: result.client.name
+     }
+     return data ;   
    }
+
+   // I N S E R T   T O   L O G S   T A B L E 
 
    function insertToLogs(type , data){
      let log  = new Logs({
@@ -171,5 +192,7 @@
      });
      log.save().catch((err)=>console.log(err.stack));
    }
+
+
 
  module.exports = router;
