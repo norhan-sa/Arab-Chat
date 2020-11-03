@@ -16,6 +16,7 @@
   try{
 
     let user = await Members.findOne({name: name}).populate('sub');
+    if(!user || !user.sub) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
 
     let have_role = user.sub.roles.includes("الصلاحيات");
     if( !have_role ) return res.status(400).send({msg:'ليس لديك صلاحية لإنشاء صلاحيات', data:null , status:'400'});

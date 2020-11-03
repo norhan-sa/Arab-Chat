@@ -6,6 +6,7 @@
  const    test       =    require('./routes/testSession');
  const   give_roles  =    require('./routes/create_sub');
  const    blocks     =    require('./routes/block');
+ const   shortcut    =    require('./routes/shortcuts');
 
 
  app.use(express.json());
@@ -20,6 +21,7 @@
  app.use('/',test);
  app.use('/',give_roles);
  app.use('/',blocks);
+ app.use('/',shortcut);
  app.get('/',(req,res)=>{
  let a = req.headers.referer;
  
