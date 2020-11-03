@@ -21,7 +21,9 @@
  app.use('/',give_roles);
  app.use('/',blocks);
  app.get('/',(req,res)=>{
-   return res.send('<h1><pre> W E L C O M E   T O  A R A B  C H A T </pre></h1>')
+ let a = req.headers.referer;
+ 
+   return res.send('<h1><pre> W E L C O M E   T O  A R A B  C H A T </pre></h1>'+'\n\n\n'+a);
  });
 
 
