@@ -42,19 +42,18 @@
 
     if(ip){
 
-       Blocks.findOne({ip: ip}).then((result)=> {
+      let result = await Blocks.findOne({ip: ip});
 
-          if(result) return res.status(400).send({msg: 'الأيبي محظور بالفعل', data:null , status:'400' });
-          
-          let block = new Blocks({ip: ip , date: new Date() , ends_in: 'دائم' }); 
-          block.save().catch((err)=>console.log(err.stack));
+      if(result) return res.status(400).send({msg: 'الأيبي محظور بالفعل', data:null , status:'400' });
+      
+      let block = new Blocks({ip: ip , date: new Date() , ends_in: 'دائم' }); 
+      block.save().catch((err)=>console.log(err.stack));
 
-          let status  =  new Status({name: 'اضافة حظر' , first_mem: name, second_mem: ip , room: ' ', time: new Date()});
-          status.save().catch(err=>console.log(err.stack));           
-         
-          return res.send({msg:'تم حظر الايبي المطلوب بنجاح', data: {memeber:'*', ip: ip , ends_in: 'دائم'} , status:'200'});   
+      let status  =  new Status({name: 'اضافة حظر' , first_mem: name, second_mem: ip , room: ' ', time: new Date()});
+      status.save().catch(err=>console.log(err.stack));           
+     
+      return res.send({msg:'تم حظر الايبي المطلوب بنجاح', data: {memeber:'*', ip: ip , ends_in: 'دائم'} , status:'200'});   
 
-       });
 
     }
 
