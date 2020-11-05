@@ -21,7 +21,7 @@
    data.info.name = name;
    data.info.decoration = name;
 
-   let is_blocked  = await Blocks.find({$or:[{ip: data.info.ip},{device_id: device_id},{country_code: data.code},{os: data.os},{browser: data.browser}]});
+   let is_blocked  = await Blocks.find({$or:[{ip: data.info.ip},{device_id: device_id},{country_code: data.info.code},{os: data.os},{browser: data.browser}]});
    if(is_blocked.length != 0) {
     insertToLogs('محظور يحاول التسجيل	', data); 
     return res.status(400).send({msg:'تم حظرك من الدردشة', data:null , status:'400'});
@@ -71,7 +71,7 @@
      data.info.decoration = user.decoration;
      data.info.id = user.id;
 
-     let is_blocked  = await Blocks.find({$or:[{ip: data.info.ip},{device_id: device_id},{country_code: data.code},{os: data.os},{browser: data.browser}]});
+     let is_blocked  = await Blocks.find({$or:[{ip: data.info.ip},{device_id: device_id},{country_code: data.info.code},{os: data.os},{browser: data.browser}]});
      if(is_blocked.length != 0) {
        insertToLogs('عضو محظور', data); 
        return res.status(400).send({msg:'تم حظرك من الدردشة', data:null , status:'400'});
@@ -118,7 +118,7 @@
       let data = await getUserData(req);
       data.info.name = name;
 
-      let is_blocked  = await Blocks.find({$or:[{ip: data.info.ip},{device_id: device_id},{country_code: data.code},{os: data.os},{browser: data.browser}]});
+      let is_blocked  = await Blocks.find({$or:[{ip: data.info.ip},{device_id: device_id},{country_code: data.info.code},{os: data.os},{browser: data.browser}]});
       if(is_blocked.length != 0) {
        insertToLogs('زائر محظور', data.info); 
        return res.status(400).send({msg:'تم حظرك من الدردشة', data:null , status:'400'});
@@ -163,8 +163,7 @@
      let data = {
        info: {
         device_type: user_data,
-        country: country,
-        city: city,
+        location: country+" - "+city,
         code: code,
         ip: ip 
       },
