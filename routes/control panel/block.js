@@ -15,7 +15,7 @@
     let isUser = await Members.findOne({name: name}).populate('sub');
     if(!isUser || !isUser.sub) return res.status(400).send({msg:'ليس لديك صلاحيات', data: null, status: '400' });
 
-    let authed = isUser.sub.roles.includes('لوحة التحكم');
+    let authed = isUser.sub.roles.includes('لوحه التحكم');
     if(!authed) return res.status(400).send({msg:'ليس لديك صلاحيات', data: null, status: '400'});
 
     if(browsers){
