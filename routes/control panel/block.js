@@ -8,7 +8,7 @@
   
   try{
 
-    let {browsers , os , ip , device_id } = req.body;
+    let {browsers , os , ip , device_id , country_code } = req.body;
 
     let name = req.session.name;
 
