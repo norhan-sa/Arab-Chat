@@ -141,17 +141,15 @@
 
    async function getUserData(req){
 
-     let userAgent = req.headers['user-agent'];  
-     console.log(userAgent);
      let result = detector.detect(userAgent);   
      let user_data = ''+result.os.name+' '+result.os.platform+' - '+result.client.type+' - '+result.client.name;
 
-     let ip = request_ip.getClientIp(req)+"" ;
-     let promise = new Promise(  resolve=>{ ipapi.location((res) => resolve(res) , ip);}  );
+     let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+     let promise = new Promise(  resolve=>{ ipapi.location((res) => resolve(res) , ip)}  ); 
      let location = await promise;
      let country , city , code;
    
-     if( location.hasOwnProperty("country_name")){
+     if( location.hasOwnProperty("country_name") ){
       country = location.country_name; 
       city = location.city;
       code = location.country_code
