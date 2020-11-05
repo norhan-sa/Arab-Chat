@@ -4,10 +4,12 @@
  const    auth       =    require('./routes/authentication');
  const   session     =    require('express-session');
  const    test       =    require('./routes/testSession');
- const   give_roles  =    require('./routes/create_sub');
- const    blocks     =    require('./routes/block');
- const   shortcut    =    require('./routes/shortcuts');
-
+ const   give_roles  =    require('./routes/control panel/create_sub');
+ const    blocks     =    require('./routes/control panel/block');
+ const   shortcut    =    require('./routes/control panel/shortcuts');
+ const    filter     =    require('./routes/control panel/filter');
+ const  logs_status  =    require('./routes/control panel/status&logs');
+ const   members     =    require('./routes/control panel/members');
 
  app.use(express.json());
 
@@ -22,10 +24,13 @@
  app.use('/',give_roles);
  app.use('/',blocks);
  app.use('/',shortcut);
+ app.use('/',filter);
+ app.use('/',logs_status);
+ app.use('/',members);
  app.get('/',(req,res)=>{
- let a = req.headers.referer;
- 
-   return res.send('<h1><pre> W E L C O M E   T O  A R A B  C H A T </pre></h1>'+'\n\n\n'+a);
+     let a = req.headers.referer;
+     const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+     return res.send('<h1><pre> W E L C O M E   T O  A R A B  C H A T </pre></h1>'+'\n\n\n'+a+'\n\n\n'+clientIp);
  });
 
 

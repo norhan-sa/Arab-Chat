@@ -1,14 +1,14 @@
 
- const router  =  require('express').Router();
- const Blocks  =  require('../models/blockList');
- const Members =  require('../models/members');
- const Status  =  require('../models/status');
+ const   router    =    require('express').Router();
+ const   Blocks    =    require('../../models/blockList');
+ const   Members   =    require('../../models/members');
+ const   Status    =    require('../../models/status');
 
  router.post('/blocks',async(req,res)=>{
   
   try{
 
-    let {browsers , os , ip , device_id , member_name} = req.body;
+    let {browsers , os , ip , device_id } = req.body;
 
     let name = req.session.name;
 
@@ -92,7 +92,7 @@
       });
       }
 
-    return res.status(400).send({msg: 'الرجاء التحقق من ارسال بيانات'});
+    return res.status(400).send({msg: 'الرجاء التحقق من ارسال بيانات', data:null , status:'400'});
     
   }catch(err){
     console.log(err.stack);

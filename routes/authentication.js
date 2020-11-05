@@ -2,7 +2,6 @@
  const   Members      =    require('../models/members');
  const    Logs        =    require('../models/logs');
  const   Blocks       =    require('../models/blockList');
- const  Subscription  =    require('../models/subscriptions');
  const  request_ip    =    require('request-ip');
  const    ipapi       =    require('ipapi.co');
  const    bcrypt      =    require('bcrypt');
@@ -16,13 +15,13 @@
   try{
 
    let {name , password , device_id} = req.body;
-   if(!name || !password || !device_id) return res.status(400).send({msg:"الرجاء التحقق من البيانات المدخلة" ,data:null ,status:'400'}); 
+   if(!(name && password && device_id)) return res.status(400).send({msg:"الرجاء التحقق من البيانات المدخلة" ,data:null ,status:'400'}); 
 
    let data = await getUserData(req);
    data.info.name = name;
    data.info.decoration = name;
 
-   let is_blocked  = await Blocks.find({$or:[{ip: data.ip},{device_id: device_id},{country_code: data.code},{os: data.os},{browser: data.browser}]});
+   let is_blocked  = await Blocks.find({$or:[{ip: data.info.ip},{device_id: device_id},{country_code: data.code},{os: data.os},{browser: data.browser}]});
    if(is_blocked.length != 0) {
     insertToLogs('محظور يحاول التسجيل	', data); 
     return res.status(400).send({msg:'تم حظرك من الدردشة', data:null , status:'400'});
@@ -62,7 +61,7 @@
    try{
      
      let {name , password , device_id} = req.body;
-     if(!name || !password || !device_id) return res.status(400).send({msg:"الرجاء التحقق من البيانات المدخلة" ,data:null ,status:'400'});
+     if(!(name && password && device_id)) return res.status(400).send({msg:"الرجاء التحقق من البيانات المدخلة" ,data:null ,status:'400'});
 
      let user  =  await Members.findOne({name: name}).populate('sub');
      if( !user ) return res.status(400).send({msg:'أنت مخطئ في اسم المستخدم', data:null , status:'400'});
@@ -72,7 +71,7 @@
      data.info.decoration = user.decoration;
      data.info.id = user.id;
 
-     let is_blocked  = await Blocks.find({$or:[{ip: data.ip},{device_id: device_id},{country_code: data.code},{os: data.os},{browser: data.browser}]});
+     let is_blocked  = await Blocks.find({$or:[{ip: data.info.ip},{device_id: device_id},{country_code: data.code},{os: data.os},{browser: data.browser}]});
      if(is_blocked.length != 0) {
        insertToLogs('عضو محظور', data); 
        return res.status(400).send({msg:'تم حظرك من الدردشة', data:null , status:'400'});
@@ -87,7 +86,7 @@
      if(user.sub) roles = user.sub.roles;
      data.info.roles = roles;
 
-     Members.findOneAndUpdate({id: user.id},{ last_ip: data.ip , last_device: data.device_type , last_login: new Date() })
+     Members.findOneAndUpdate({id: user.id},{ last_ip: data.info.ip , last_device: data.info.device_type , last_login: new Date() })
      .catch((err)=>console.log(err.stack));
 
      insertToLogs('دخول العضو', data.info);
@@ -111,7 +110,7 @@
      try{
 
       let {name , device_id} = req.body;
-      if(!name || !device_id) return res.status(400).send({msg:"الرجاء التحقق من البيانات المدخلة" ,data:null ,status:'400'});
+      if(!(name && device_id)) return res.status(400).send({msg:"الرجاء التحقق من البيانات المدخلة" ,data:null ,status:'400'});
    
       let isMember = await Members.findOne({$or: [{name: name},{decoration: name}]});
       if( isMember ) return res.status(400).send({msg:'هذا الإسم مسجل من قبل' , data:null , status:'400'});
@@ -119,7 +118,7 @@
       let data = await getUserData(req);
       data.info.name = name;
 
-      let is_blocked  = await Blocks.find({$or:[{ip: data.ip},{device_id: device_id},{country_code: data.code},{os: data.os},{browser: data.browser}]});
+      let is_blocked  = await Blocks.find({$or:[{ip: data.info.ip},{device_id: device_id},{country_code: data.code},{os: data.os},{browser: data.browser}]});
       if(is_blocked.length != 0) {
        insertToLogs('زائر محظور', data.info); 
        return res.status(400).send({msg:'تم حظرك من الدردشة', data:null , status:'400'});
@@ -192,7 +191,5 @@
      });
      log.save().catch((err)=>console.log(err.stack));
    }
-
-
 
  module.exports = router;

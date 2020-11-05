@@ -11,7 +11,7 @@
    value: {
      type: Number,
      required: true,
-     max: 9000       
+     max: 9999       
    },
    roles: {
      type: Array        

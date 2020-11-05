@@ -1,8 +1,8 @@
  const    router     =   require('express').Router();
- const    Members    =   require('../models/members');
- const Subscriptions =   require('../models/subscriptions'); 
- const   Status      =   require('../models/status');
- const    Logs       =   require('../models/logs');
+ const    Members    =   require('../../models/members');
+ const Subscriptions =   require('../../models/subscriptions'); 
+ const   Status      =   require('../../models/status');
+ const    Logs       =   require('../../models/logs');
 
  router.get('/get_status', async(req , res)=>{
    
