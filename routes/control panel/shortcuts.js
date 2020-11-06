@@ -9,7 +9,7 @@
 
   try{
     let { word , decoration } = req.body;
-    if(!word || !decoration) return res.status(400).send({msg:'الرجاء التحقق من البيانات', data:null , status:'400'});
+    if(!(word && decoration)) return res.status(400).send({msg:'الرجاء التحقق من البيانات', data:null , status:'400'});
  
     let name = req.session.name;
     if(!name) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});

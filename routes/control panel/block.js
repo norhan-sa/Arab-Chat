@@ -4,6 +4,7 @@
  const   Members   =    require('../../models/members');
  const   Status    =    require('../../models/status');
 
+ 
  router.post('/blocks',async(req,res)=>{
   
   try{
@@ -83,7 +84,7 @@
             let block = new Blocks({country_code: country_code, date: new Date(), ends_in: 'دائم' }); 
             block.save().catch((err)=>console.log(err.stack));
             
-            let status  =  new Status({name: 'اضافة حظر' , first_mem: name, second_mem: country_code , room: ' ', time: new Date()});
+            let status  =  new Status({name: 'حظر من الدردشة' , first_mem: name, second_mem: country_code , room: ' ', time: new Date()});
             status.save().catch(err=>console.log(err.stack));
    
             return res.send({msg:'تم حظر الدولة المطلوبة بنجاح', data: {memeber:'*', device_id: device_id , ends_in: 'دائم'} , status:'200'});      
@@ -100,7 +101,77 @@
 
  });
 
+ //ــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ
 
+ // D E L E T E   F R O M   B L O C K   L I S T 
+
+ router.post('/blocks',async(req,res)=>{
+  
+   try{
+ 
+     let { ip , device_id , country_code } = req.body;
+ 
+     let name = req.session.name;
+ 
+     let isUser = await Members.findOne({name: name}).populate('sub');
+     if(!(isUser && isUser.sub)) return res.status(400).send({msg:'ليس لديك صلاحيات', data: null, status: '400' });
+ 
+     let authed = isUser.sub.roles.includes('لوحه التحكم');
+     if(!authed) return res.status(400).send({msg:'ليس لديك صلاحيات', data: null, status: '400'});
+  
+     if(ip){
+ 
+       Blocks.findOneAndDelete({ip: ip}).catch(err=>console.log(err.stack));
+ 
+       let status  =  new Status({name: 'ازالة حظر' , first_mem: name, second_mem: ip , room: ' ', time: new Date()});
+       status.save().catch(err=>console.log(err.stack));           
+      
+       return res.send({msg:'تم إلغاء حظر الايبي المطلوب بنجاح', data: {memeber:'*', ip: ip , ends_in: 'دائم'} , status:'200'});   
+
+     }
+ 
+     if(device_id){
+ 
+       Blocks.findOne({device_id: device_id}).then((res)=> {
+ 
+          if(res) return res.status(400).send({msg: 'الجهاز محظور بالفعل', data:null , status:'400' });
+          
+          let block = new Blocks({device_id: device_id, date: new Date(), ends_in: 'دائم' }); 
+          block.save().catch((err)=>console.log(err.stack));
+          
+          let status  =  new Status({name: 'اضافة حظر' , first_mem: name, second_mem: device_id , room: ' ', time: new Date()});
+          status.save().catch(err=>console.log(err.stack));
+ 
+          return res.send({msg:'تم حظر الجهاز المطلوب بنجاح', data: {memeber:'*', device_id: device_id , ends_in: 'دائم'} , status:'200'});      
+       
+       }); 
+       }
+ 
+       if(country_code){
+ 
+          Blocks.findOne({country_code: country_code}).then((res)=> {
+    
+             if(res) return res.status(400).send({msg: 'الدولة محظورة بالفعل', data:null , status:'400' });
+             
+             let block = new Blocks({country_code: country_code, date: new Date(), ends_in: 'دائم' }); 
+             block.save().catch((err)=>console.log(err.stack));
+             
+             let status  =  new Status({name: 'اضافة حظر' , first_mem: name, second_mem: country_code , room: ' ', time: new Date()});
+             status.save().catch(err=>console.log(err.stack));
+    
+             return res.send({msg:'تم حظر الدولة المطلوبة بنجاح', data: {memeber:'*', device_id: device_id , ends_in: 'دائم'} , status:'200'});      
+          
+       });
+       }
+ 
+     return res.status(400).send({msg: 'الرجاء التحقق من ارسال بيانات', data:null , status:'400'});
+     
+   }catch(err){
+     console.log(err.stack);
+     return res.status(500).send({msg:'حدث خطا ما', data: null , status:'500'});    
+   }        
+ 
+  });
 
  //ـــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ
 

@@ -10,6 +10,7 @@
  const    filter     =    require('./routes/control panel/filter');
  const  logs_status  =    require('./routes/control panel/status&logs');
  const   members     =    require('./routes/control panel/members');
+ const   messages    =    require('./routes/control panel/messages');
 
  app.use(express.json());
 
@@ -27,11 +28,11 @@
  app.use('/',filter);
  app.use('/',logs_status);
  app.use('/',members);
+ app.use('/',messages);
  app.get('/',(req,res)=>{
      let a = req.headers.referer;
      const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
      return res.send('<h1><pre> W E L C O M E   T O  A R A B  C H A T </pre></h1>'+'\n\n\n'+a+'\n\n\n'+clientIp);
  });
-
 
  module.exports = app;

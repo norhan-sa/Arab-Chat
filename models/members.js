@@ -40,6 +40,9 @@
    },
    reg_date: {
       type: Date
+   },
+   expire_date: {
+      type: Date
    } 
  });
 

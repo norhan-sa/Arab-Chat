@@ -3,10 +3,12 @@
  const   server   =    http.createServer(app);
  const     io     =    require('socket.io')(server);
  const    Rooms   =    require('./models/rooms');
+ const   Members  =    require('./models/members');
  const  joinChat  =    require('./chat');
 
 
-  //   C R E A T E   N E W   R O O M 
+ //   C R E A T E   N E W   R O O M 
+
   app.post('/Create_namespace', async(req,res)=>{
 
       let { roomName, desc, welcome_msg, password, size, is_constant }  =  req.body;
@@ -41,7 +43,9 @@
   });
 
 
+
   //   D E L E T E   T H E   R O O M
+
   app.post('/delete_namespace',(req,res)=>{
 
      let {roomID , roomName}  =  req.body;
