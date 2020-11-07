@@ -14,7 +14,7 @@
    
   try{
 
-   let {name , password , device_id} = req.body;
+   let {name , password , device_id , token} = req.body;
    if(!(name && password && device_id && token)) return res.status(400).send({msg:"الرجاء التحقق من البيانات المدخلة" ,data:null ,status:'400'}); 
 
    let data = await getUserData(req);
@@ -61,7 +61,7 @@
    
    try{
      
-     let {name , password , device_id} = req.body;
+     let {name , password , device_id , token} = req.body;
      if(!(name && password && device_id && token)) return res.status(400).send({msg:"الرجاء التحقق من البيانات المدخلة" ,data:null ,status:'400'});
 
      let user  =  await Members.findOne({name: name}).populate('sub');
@@ -112,7 +112,7 @@
 
      try{
 
-      let {name , device_id} = req.body;
+      let {name , device_id , token} = req.body;
       if(!(name && device_id && token)) return res.status(400).send({msg:"الرجاء التحقق من البيانات المدخلة" ,data:null ,status:'400'});
    
       let isMember = await Members.findOne({$or: [{name: name},{decoration: name}]});

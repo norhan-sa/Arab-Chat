@@ -41,12 +41,12 @@ let a = [
 ]
 
 route.get('/test1',async(req,res)=>{
-  let sub = await Subscriptions.findOne({name: 'test'});
+  let sub = await Subscriptions.findOne({name: 'chatmaster'});
 
   let salt = await bcrypt.genSalt(10);
-  let hashedPass = await bcrypt.hash('11223344',salt);
+  let hashedPass = await bcrypt.hash('1234567890',salt);
 
-  let mem = new Members({name: 'mera' , decoration: 'mera', password: hashedPass , reg_date: new Date() , sub: sub._id , expire_date: new Date()});
+  let mem = new Members({name: 'admin' , decoration: 'admin', password: hashedPass , reg_date: new Date() , sub: sub._id });
   let r = await mem.save()
   return res.send(r);
 });
