@@ -35,6 +35,9 @@
    last_device: {
       type: String
    },
+   device_id:{
+      type: String
+   },
    last_login: {
       type: Date
    },

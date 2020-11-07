@@ -15,6 +15,9 @@
    ip: {
      type: String       
    },
+   device_id:{
+     type: String 
+   },
    device_type: {
      type: String       
    },
