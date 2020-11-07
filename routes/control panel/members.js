@@ -7,7 +7,7 @@
 
     try{
 
-     let name = req.session.name;
+     var name = req.session.name;
      if(!name) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
 
      let user = await Members.findOne({name: name}).populate('sub');
@@ -49,30 +49,30 @@
 
  //  G I V E   S U B S C R I P T I O N   T O   A   U S E R
 
-//  router.post('/give_subscription', async(req,res)=>{
+ router.post('/give_subscription', async(req,res)=>{
 
-//    try{
+   try{
 
-//       let {user_name , sub_name}  = req.body;
-//       if(!(user_name && sub_name))
+      let {user_name , sub_name}  = req.body;
+      if(!(user_name && sub_name)) return res.status(400).send({msg:'الرجاء التحقق من البيانات', data:null , status:'400'});
 
-//       let name = req.session.name;
-//       if(!name) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
+      let name = req.session.name;
+      if(!name) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
  
-//       let user = await Members.findOne({name: name}).populate('sub');
-//       if(!user || !user.sub) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
+      let user = await Members.findOne({name: name}).populate('sub');
+      if(!user || !user.sub) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
  
-//       let isAuthed = user.sub.roles.includes('إداره العضويات');
-//       if(!isAuthed) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
+      let isAuthed = user.sub.roles.includes('إداره العضويات');
+      if(!isAuthed) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
  
-//       let sub  =  await Subscriptions.findOne({name: sub_name});
+      let sub  =  await Subscriptions.findOne({name: sub_name});
 
 
-//      }catch(err){         
-//        console.log(err.stack);
-//        return res.status(500).send({msg:'حدث خطأ ما', data:null , status:'500'});      
-//      }
+     }catch(err){         
+       console.log(err.stack);
+       return res.status(500).send({msg:'حدث خطأ ما', data:null , status:'500'});      
+     }
 
-//  });
+ });
 
  module.exports  =  router;

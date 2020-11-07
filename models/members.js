@@ -44,6 +44,9 @@
    reg_date: {
       type: Date
    },
+   token: {
+      type: String
+   },
    expire_date: {
       type: Date
    } 
