@@ -8,7 +8,7 @@
 
  const token = req.header('x-auth-token');
  
- if(!token) res.status(401).send({data:null,msg:"access denied. no token provided",status:"401"});
+ if(!token) return res.status(401).send({data:null,msg:"access denied. no token provided",status:"401"});
 
  try{
 
@@ -20,7 +20,7 @@
 
  }catch(err){
    console.log(err.message);
-   res.status(400).send({data:null,msg:"Invalid Token !",status:"400"});
+   return res.status(400).send({data:null,msg:"Invalid Token !",status:"400"});
  }
 
  }
