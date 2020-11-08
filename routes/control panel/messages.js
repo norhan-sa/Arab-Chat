@@ -2,17 +2,18 @@
  const   Members   =    require('../../models/members');
  const   Messages  =    require('../../models/messages');
  const   Status    =    require('../../models/status');
+ const    auth     =    require('../../midleware/auth');
 
  //   D E L E T E   A   M E S S A G E 
  
- router.post('/add_message', async (req, res)=>{
+ router.post('/add_message', auth ,async (req, res)=>{
 
    try{
 
     let { type , title , body } = req.body;
     if(!(type && title && body)) return res.status(400).send({msg:'الرجاء التحقق من البيانات', data:null , status:'400'});
          
-    let name = req.session.name;
+    let name = req.body.$name;
     if(!name) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
          
     let user = await Members.findOne({name: name}).populate('sub');
@@ -53,14 +54,14 @@
 
  //      D E L E T E   A   M E S S A G E
          
- router.post('/delete_message', async (req, res)=>{
+ router.post('/delete_message', auth ,async (req, res)=>{
 
    try{
 
     let {id} = req.body;
     if(!id) return res.status(400).send({msg:'الرجاء التحقق من البيانات', data:null , status:'400'});
          
-    let name = req.session.name;
+    let name = req.body.$name;
     if(!name) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
          
     let user = await Members.findOne({name: name}).populate('sub');
@@ -87,11 +88,11 @@
 
  //   G E T   M E S S A G E S   L I S T
 
- router.get('/get_messages', async (req, res)=>{
+ router.get('/get_messages', auth , async (req, res)=>{
 
    try{
     
-    let name = req.session.name;
+    let name = req.body.$name;
     if(!name) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
          
     let user = await Members.findOne({name: name}).populate('sub');

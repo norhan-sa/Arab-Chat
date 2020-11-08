@@ -19,6 +19,7 @@
     "express-session": "^1.17.1",
     "ipapi.co": "^0.3.0",
     "joi": "^17.3.0",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.10.10",
     "mongoose-sequence": "^5.3.0",
     "node-device-detector": "^1.2.9",

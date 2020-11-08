@@ -1,17 +1,18 @@
  const   router    =   require('express').Router();
  const  Members    =   require('../../models/members');
  const  Shortcuts  =   require('../../models/shortcuts');
+ const   auth      =   require('../../midleware/auth');
 
 
  // A D D   N E W   S H O R T C U T *
 
- router.post('/add_shortcut', async (req, res)=>{
+ router.post('/add_shortcut', auth , async (req, res)=>{
 
   try{
     let { word , decoration } = req.body;
     if(!(word && decoration)) return res.status(400).send({msg:'الرجاء التحقق من البيانات', data:null , status:'400'});
  
-    let name = req.session.name;
+    let name = req.body.$name;
     if(!name) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
  
     let user = await Members.findOne({name: name}).populate('sub');
@@ -46,11 +47,11 @@
 
  //  G E T   T H E   S H O R T C U T S 
 
- router.get('/get_shortcuts', async (req, res)=>{
+ router.get('/get_shortcuts', auth , async (req, res)=>{
 
   try{
 
-    let name = req.session.name;
+    let name = req.body.$name;
     if(!name) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
  
     let user = await Members.findOne({name: name}).populate('sub');
@@ -77,14 +78,14 @@
 
  //  D E L E T E   S H O R T C U T 
 
- router.post('/delete_shortcut', async (req, res)=>{
+ router.post('/delete_shortcut', auth ,async (req, res)=>{
 
   try{
 
     let { word } = req.body;
     if(!word) return res.status(400).send({msg:'الرجاء التحقق من البيانات', data:null , status:'400'});
  
-    let name = req.session.name;
+    let name = req.body.$name;
     if(!name) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
  
     let user = await Members.findOne({name: name}).populate('sub');

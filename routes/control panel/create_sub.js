@@ -2,12 +2,13 @@
  const    Members    =   require('../../models/members');
  const Subscriptions =   require('../../models/subscriptions');
  const   Status      =   require('../../models/status');
+ const    auth       =   require('../../midleware/auth');
  const    Joi        =   require('joi');
 
 
  // C R E A T E   O R   U P D A T E   S U B S C R I P T I O N 
 
- router.post('/create_subscription', async(req, res)=>{
+ router.post('/create_subscription', auth ,async(req, res)=>{
 
   try{
 
@@ -16,7 +17,7 @@
 
     let {roles, sub_name, value , max_kick , max_gifts , max_adv , max_constRooms}  = req.body; 
 
-    let name  = req.session.name; 
+    let name = req.body.$name; 
     if(!name) return res.status(400).send({msg:'ليس لديك صلاحية', data:null , status:'400'});  
 
     let user = await Members.findOne({name: name}).populate('sub');
@@ -89,13 +90,13 @@
 
  //  D E L E T E   A   S U B S C R I P T I O N
 
- router.post('/delete_subscription', async(req, res)=>{
+ router.post('/delete_subscription', auth , async(req, res)=>{
 
   try{
     let {sub_name}  = req.body; 
     if(!sub_name) return res.status(400).send({msg: 'الرجاء التحقق من ارسال بيانات', data:null , status:'400'}); 
 
-    let name  = req.session.name; 
+    let name = req.body.$name; 
     if(!name) return res.status(400).send({msg:'ليس لديك صلاحية', data:null , status:'400'});
   
     let user = await Members.findOne({name: name}).populate('sub');
@@ -137,11 +138,11 @@
 
  //   G E T   S U B S C R I P T I O N   D A T A
 
- router.get('/get_subscriptions', async(req,res)=>{
+ router.get('/get_subscriptions', auth , async(req,res)=>{
 
   try{
 
-    let name  = req.session.name; 
+    let name = req.body.$name; 
     if(!name) return res.status(400).send({msg:'ليس لديك صلاحية', data:null , status:'400'});
   
     let user = await Members.findOne({name: name}).populate('sub');

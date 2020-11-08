@@ -5,6 +5,7 @@
  const  request_ip    =    require('request-ip');
  const    ipapi       =    require('ipapi.co');
  const    bcrypt      =    require('bcrypt');
+ const generateToken  =    require('../config/generateToken');
  const DeviceDetector =    require('node-device-detector');
  const   detector     =    new DeviceDetector;
 
@@ -21,7 +22,6 @@
    data.info.name = name;
    data.info.decoration = name;
    data.info.device_id = device_id;
-   data.info.token = token;
 
    let is_blocked  = await Blocks.find({$or:[{ip: data.info.ip},{device_id: device_id},{country_code: data.info.code},{os: data.os},{browser: data.browser}]});
    if(is_blocked.length != 0) {
@@ -35,15 +35,15 @@
    let salt = await bcrypt.genSalt(10);
    let hashedPass = await bcrypt.hash(password,salt);
 
-   req.session.name = name;
+   let my_token = generateToken({name: name});
 
-   let member = new Members({name: name , decoration: name, password: hashedPass , last_ip: data.info.ip , last_device: data.info.device_type , device_id: device_id, last_login: new Date() , token: token , reg_date: new Date()});
+   let member = new Members({name: name , decoration: name, password: hashedPass , last_ip: data.info.ip , last_device: device_id , device_id: device_id, last_login: new Date() , token: token , reg_date: new Date()});
    let save_user = await member.save()
    data.info.id =  save_user.id;
 
    insertToLogs('تسجيل عضوية', data.info);
 
-   return res.send({msg:'تم تسجيل العضو بنجاح', data: data.info, status:'200'});
+   return res.send({msg:'تم تسجيل العضو بنجاح', data: data.info, token: my_token, status:'200'});
 
   }catch(err){
 
@@ -84,19 +84,19 @@
      let result = await bcrypt.compare(password , user.password);
      if(!result) return res.status(400).send({msg:'أنت مخطئ في كلمة المرور' , data: null , status:'400'});
 
-     req.session.name = user.name;
+     let token = generateToken({name: name});
 
      let roles = null;
      if(user.sub) roles = user.sub.roles;
      data.info.roles = roles;
      data.info.device_id = device_id;
 
-     Members.findOneAndUpdate({id: user.id},{ last_ip: data.info.ip , last_device: data.info.device_type , device_id: device_id, last_login: new Date() })
+     Members.findOneAndUpdate({id: user.id},{ last_ip: data.info.ip , last_device: device_id , device_id: device_id, last_login: new Date() })
      .catch((err)=>console.log(err.stack));
 
      insertToLogs('دخول العضو', data.info);
 
-     return res.send({msg:'تم تسجيل الدخول بنجاح', data:data.info ,status:200});
+     return res.send({msg:'تم تسجيل الدخول بنجاح', data:data.info, token: token, status:200});
      
    }catch(err){
 
@@ -171,7 +171,7 @@
         location: country+" - "+city,
         code: code,
         ip: ip 
-      },
+       },
       os: result.os.name,
       browser: result.client.name
      }

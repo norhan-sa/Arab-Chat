@@ -3,15 +3,16 @@
  const   Blocks    =    require('../../models/blockList');
  const   Members   =    require('../../models/members');
  const   Status    =    require('../../models/status');
+ const    auth     =    require('../../midleware/auth');
 
  
- router.post('/blocks',async(req,res)=>{
+ router.post('/blocks', auth ,async(req,res)=>{
   
   try{
 
     let {browsers , os , ip , device_id , country_code } = req.body;
 
-    let name = req.session.name;
+    let name = req.body.$name;
 
     let isUser = await Members.findOne({name: name}).populate('sub');
     if(!isUser || !isUser.sub) return res.status(400).send({msg:'ليس لديك صلاحيات', data: null, status: '400' });
@@ -111,7 +112,7 @@
  
      let { ip , device_id , country_code } = req.body;
  
-     let name = req.session.name;
+     let name = req.body.$name;
  
      let isUser = await Members.findOne({name: name}).populate('sub');
      if(!(isUser && isUser.sub)) return res.status(400).send({msg:'ليس لديك صلاحيات', data: null, status: '400' });
@@ -184,7 +185,7 @@
    
    let { ip , device_id , member_name , member_id } = req.body;
 
-   let name = req.session.name;
+   let name = req.body.$name;
 
    let isUser = await Members.findOne({name: name}).populate('sub');
    if(!isUser || !isUser.sub) return res.status(400).send({msg:'ليس لديك صلاحيات', data: null, status: '400' });

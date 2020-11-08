@@ -2,17 +2,18 @@
  const  Filter   =   require('../../models/filter');
  const  Members  =   require('../../models/members');
  const  Status   =   require('../../models/status');
+ const   auth    =   require('../../midleware/auth');
 
  //  A D D   A   W O R D   T O   T H E   F I L T E R
 
- router.post('/add_filteredword', async(req,res)=>{
+ router.post('/add_filteredword', auth , async(req,res)=>{
  
   try{
 
     let {word , type} = req.body;
     if(!word || !type) return res.status(400).send({msg:'الرجاء التحقق من البيانات', data:null , status:'400'});
 
-    let name = req.session.name;
+    let name = req.body.$name;
     if(!name) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
  
     let user = await Members.findOne({name: name}).populate('sub');
@@ -55,11 +56,11 @@
  //  G E T   F I L T E R E D   W O R D S 
 
 
- router.get('/get_filteredwords', async(req,res)=>{
+ router.get('/get_filteredwords', auth , async(req,res)=>{
  
   try{
  
-     let name = req.session.name;
+     let name = req.body.$name;
      if(!name) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
          
      let user = await Members.findOne({name: name}).populate('sub');
@@ -84,14 +85,14 @@
 
  // D E L E T E   F I L T E R E D   W O R D S
 
- router.post('/delete_filteredword', async(req,res)=>{
+ router.post('/delete_filteredword', auth , async(req,res)=>{
 
    try{
 
     let {word , type} = req.body;
     if(!word || !type) return res.status(400).send({msg:'الرجاء التحقق من البيانات', data:null , status:'400'});
 
-    let name = req.session.name;
+    let name = req.body.$name;
     if(!name) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
 
     let user = await Members.findOne({name: name}).populate('sub');

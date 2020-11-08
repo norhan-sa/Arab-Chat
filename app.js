@@ -20,6 +20,7 @@
   resave: false,  
   saveUninitialized: true
  }));
+
  app.use(cors());
  app.all((req,res,next)=>{
  res.header("Access-Control-Allow-Origin", "*");
@@ -41,9 +42,9 @@
  app.use('/',members);
  app.use('/',messages);
  app.get('/',(req,res)=>{
-     let a = req.headers.referer;
-     const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-     return res.send('<h1><pre> W E L C O M E   T O  A R A B  C H A T </pre></h1>'+'\n\n\n'+a+'\n\n\n'+clientIp);
+   let a = req.headers.referer;
+   const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    return res.send('<h1><pre> W E L C O M E   T O  A R A B  C H A T </pre></h1>'+'\n\n\n'+a+'\n\n\n'+clientIp);
  });
 
  module.exports = app;

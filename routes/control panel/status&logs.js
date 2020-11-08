@@ -1,16 +1,16 @@
  const   router   =   require('express').Router();
- const  Members  =   require('../../models/members');
+ const  Members   =   require('../../models/members');
  const   Status   =   require('../../models/status');
  const    Logs    =   require('../../models/logs');
-
+ const    auth    =   require('../../midleware/auth');
 
  // G E T   L O G S   T A B L E
 
- router.get('/status' , async(req,res)=>{
+ router.get('/status' , auth , async(req,res)=>{
 
   try{
 
-    let name = req.session.name;
+    let name = req.body.$name;
     if(!name) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
 
     let user = await Members.findOne({name: name}).populate('sub');
@@ -34,11 +34,11 @@
 
  // G E T   L O G S   T A B L E
 
- router.get('/logs' , async(req,res)=>{
+ router.get('/logs' , auth , async(req,res)=>{
 
   try{
 
-    let name = req.session.name;
+    let name = req.body.$name;
     if(!name) return res.status(400).send({msg:'ليس لديك صلاحيات', data:null , status:'400'});
 
     let user = await Members.findOne({name: name}).populate('sub');

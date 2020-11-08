@@ -49,6 +49,16 @@
    },
    expire_date: {
       type: Date
+   },
+   likes: {
+      type: Number,
+      default: 0
+   },
+   is_certified: {
+      type: Boolean
+   },
+   is_special: {
+      type: Boolean
    } 
  });
 
