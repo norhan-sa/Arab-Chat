@@ -8,13 +8,14 @@
 
  const token = req.header('x-auth-token');
  
- if(!token) return res.status(401).send({data:null,msg:"access denied. no token provided",status:"401"});
+ if(!token) return res.status(401).send({data:null,msg:"ليس لديك صلاحيات",status:"401"});
 
  try{
 
    const decoded = jwt.verify(token,jwtkey);
 
-   req.body.$name = decoded.name;
+   req.body.$name = decoded.member;
+   req.body.$visitor = decoded.visitor;
 
    next();
 

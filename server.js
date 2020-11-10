@@ -43,7 +43,6 @@
   });
 
 
-
   //   D E L E T E   T H E   R O O M
 
   app.post('/delete_namespace',(req,res)=>{
@@ -65,7 +64,6 @@
      return res.send(`the ${roomName} is deleted successfully`);   
 
   });
-
 
  //  C O N N E C T I N G   T O   T H E   S E R V E R
 

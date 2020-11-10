@@ -9,6 +9,7 @@
  const DeviceDetector =    require('node-device-detector');
  const   detector     =    new DeviceDetector;
 
+ 
  // R E G E S T R A T I O N
 
  router.post('/reg', async(req, res)=>{
@@ -35,7 +36,7 @@
    let salt = await bcrypt.genSalt(10);
    let hashedPass = await bcrypt.hash(password,salt);
 
-   let my_token = generateToken({name: name});
+   let my_token = generateToken({member: name});
 
    let member = new Members({name: name , decoration: name, password: hashedPass , last_ip: data.info.ip , last_device: device_id , device_id: device_id, last_login: new Date() , token: token , reg_date: new Date()});
    let save_user = await member.save()
@@ -84,7 +85,7 @@
      let result = await bcrypt.compare(password , user.password);
      if(!result) return res.status(400).send({msg:'أنت مخطئ في كلمة المرور' , data: null , status:'400'});
 
-     let token = generateToken({name: name});
+     let token = generateToken({member: name});
 
      let roles = null;
      if(user.sub) roles = user.sub.roles;
@@ -110,37 +111,39 @@
    
    // V I S I T O R
 
-   router.post('/visitor', async(req,res)=>{
+  router.post('/visitor', async(req,res)=>{
 
-     try{
+    try{
 
-      let {name , device_id } = req.body;
-      if(!(name && device_id)) return res.status(400).send({msg:"الرجاء التحقق من البيانات المدخلة" ,data:null ,status:'400'});
-   
-      let isMember = await Members.findOne({$or: [{name: name},{decoration: name}]});
-      if( isMember ) return res.status(400).send({msg:'هذا الإسم مسجل من قبل' , data:null , status:'400'});
+    let {name , device_id } = req.body;
+    if(!(name && device_id)) return res.status(400).send({msg:"الرجاء التحقق من البيانات المدخلة" ,data:null ,status:'400'});
+  
+    let isMember = await Members.findOne({$or: [{name: name},{decoration: name}]});
+    if( isMember ) return res.status(400).send({msg:'هذا الإسم مسجل من قبل' , data:null , status:'400'});
 
-      let data = await getUserData(req);
-      data.info.name = name;
+    let data = await getUserData(req);
+    data.info.name = name;
 
-      let is_blocked  = await Blocks.find({$or:[{ip: data.info.ip},{device_id: device_id},{country_code: data.info.code},{os: data.os},{browser: data.browser}]});
-      if(is_blocked.length != 0) {
-       insertToLogs('زائر محظور', data.info); 
-       return res.status(400).send({msg:'تم حظرك من الدردشة', data:null , status:'400'});
-      }
-
-      insertToLogs('دخول الزائر', data.info);
-
-      return res.send({msg:'تم دخول الزائر بنجاح', data:data.info , status:'200'});
-
-    }catch(err){
-
-       console.log(err.stack);
-       return res.status(500).send({msg:'حدث خطا ما', data: null , status:'500'});   
-
+    let is_blocked  = await Blocks.find({$or:[{ip: data.info.ip},{device_id: device_id},{country_code: data.info.code},{os: data.os},{browser: data.browser}]});
+    if(is_blocked.length != 0) {
+        insertToLogs('زائر محظور', data.info); 
+        return res.status(400).send({msg:'تم حظرك من الدردشة', data:null , status:'400'});
     }
 
-   });
+    insertToLogs('دخول الزائر', data.info);
+
+    let my_token = generateToken({visitor: name});
+
+    return res.send({msg:'تم دخول الزائر بنجاح', data:data.info , token: my_token , status:'200'});
+
+  }catch(err){
+
+      console.log(err.stack);
+      return res.status(500).send({msg:'حدث خطا ما', data: null , status:'500'});   
+
+  }
+
+  });
 
    // G E T   U S E R   D A T A   F R O M   R E Q U E S T
 

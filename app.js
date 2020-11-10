@@ -12,8 +12,12 @@
  const  logs_status  =    require('./routes/control panel/status&logs');
  const   members     =    require('./routes/control panel/members');
  const   messages    =    require('./routes/control panel/messages');
+ const    pic        =    require('./routes/profile/update_picture');
+ const   prof        =    require('./routes/profile/update_profile');
 
  app.use(express.json());
+ app.use(express.static('public'));
+
 
  app.use(session({ 
   secret: 'My_APP', 
@@ -41,6 +45,8 @@
  app.use('/',logs_status);
  app.use('/',members);
  app.use('/',messages);
+ app.use('/',pic);
+ app.use('/',prof);
  app.get('/',(req,res)=>{
    let a = req.headers.referer;
    const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
