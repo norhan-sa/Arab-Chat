@@ -183,7 +183,7 @@
 
   try{        
    
-   let { ip , device_id , member_name , member_id } = req.body;
+   let { member_name } = req.body;
 
    let name = req.body.$name;
 
@@ -191,12 +191,14 @@
    if(!isUser || !isUser.sub) return res.status(400).send({msg:'ليس لديك صلاحيات', data: null, status: '400' });
    
    let authed = isUser.sub.roles.includes('الباند');
-   if(!authed) return res.status(400).send({msg:'ليس لديك صلاحيات' , data:null , status:'400'});      
+   if(!authed) return res.status(400).send({msg:'ليس لديك صلاحيات' , data:null , status:'400'}); 
+   
+   let blocked_user = await Members.findOne({name: member_name});
 
-   let block1 = new Blocks({ip: ip , member_name: member_name , mamber_id: member_id, date: new Date()}); 
+   let block1 = new Blocks({ip: blocked_user.last_ip , member_name: member_name , date: new Date()}); 
    block1.save().catch((err)=>console.log(err.stack));  
           
-   let block2 = new Blocks({device_id: device_id , member_name: member_name , mamber_id: member_id , date: new Date()}); 
+   let block2 = new Blocks({device_id: blocked_user.device_id , member_name: member_name , mamber_id: member_id , date: new Date()}); 
    block2.save().catch((err)=>console.log(err.stack));
 
    let status  =  new Status({name: 'حظر من الدردشة' , first_mem: name, second_mem: member_name , room: ' ', time: new Date()});

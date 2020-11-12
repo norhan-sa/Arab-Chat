@@ -14,6 +14,7 @@
  const   messages    =    require('./routes/control panel/messages');
  const    pic        =    require('./routes/profile/update_picture');
  const   prof        =    require('./routes/profile/update_profile');
+ const   logout      =    require('./routes/logout');
 
  app.use(express.json());
  app.use(express.static('public'));
@@ -47,6 +48,7 @@
  app.use('/',messages);
  app.use('/',pic);
  app.use('/',prof);
+ app.use('/',logout);
  app.get('/',(req,res)=>{
    let a = req.headers.referer;
    const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;

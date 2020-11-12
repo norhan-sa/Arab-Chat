@@ -45,6 +45,44 @@
 
  }
 
+ //*********************************************************************/
+
+ async function upload_private_file(filePath , mimeType , filename){
+
+  try{
+
+    var bucket_p = admin.storage().bucket();
+
+    const metadata = {
+      metadata: {
+        firebaseStorageDownloadTokens: filename
+      },
+      contentType: mimeType
+    };
+
+    const options = {
+      destination: 'private/'+filename,
+      predefinedAcl: 'publicRead',
+      gzip: true,
+      metadata: metadata,
+    };
+
+   let result = await bucket_p.upload(filePath, options);
+
+   let data = result[0].metadata;
+   let url = "https://firebasestorage.googleapis.com/v0/b/arab-chat-148f2.appspot.com/o/"+data.name+"?alt=media&token="+data.metadata.firebaseStorageDownloadTokens; 
+
+   console.log(`${filePath} uploaded.`);
+   return url;
+
+  }catch(err){
+    console.log(err.stack);
+    return;
+  }
+
+ }
+
+ //******************************************************** */
  async function delete_file(file_name){
   
   try{
@@ -65,6 +103,7 @@
 
  exports.upload_file = upload_file;
  exports.delete_file = delete_file;
+ exports.upload_private_file = upload_private_file;
 
  
 //  async function a(){ 

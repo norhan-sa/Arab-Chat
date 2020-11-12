@@ -2,10 +2,9 @@
  const jwt = require('jsonwebtoken');
  const config = require('dotenv').config();
 
- let jwtkey = process.env.JWT_KEY;
-
  async function auth(req,res,next){
 
+ let jwtkey = process.env.JWT_KEY; 
  const token = req.header('x-auth-token');
  
  if(!token) return res.status(401).send({data:null,msg:"ليس لديك صلاحيات",status:"401"});
@@ -14,13 +13,12 @@
 
    const decoded = jwt.verify(token,jwtkey);
 
-   req.body.$name = decoded.member;
-   req.body.$visitor = decoded.visitor;
+   req.body.$name = decoded.name;
 
    next();
 
  }catch(err){
-   console.log(err.message);
+   console.log(err.stack);
    return res.status(400).send({data:null,msg:"Invalid Token !",status:"400"});
  }
 

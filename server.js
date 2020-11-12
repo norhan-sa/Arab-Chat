@@ -6,6 +6,8 @@
  const   Members  =    require('./models/members');
  const  joinChat  =    require('./chat');
 
+ let nsp = io.of('/main'); 
+ module.exports = nsp;
 
  //   C R E A T E   N E W   R O O M 
 
@@ -16,7 +18,7 @@
       let isUsedName = await Rooms.findOne({name: roomName});
       if(isUsedName) return res.status(400).send({msg:'اسم الغرفة مستخدم بالفعل',data:null,status:'400'});
 
-      const chatNsp = io.of('/'+ roomID);   
+      const chatNsp = io.of('/'+ roomName);   
       joinChat(chatNsp , roomName);
       
       let room = new Rooms({
@@ -65,6 +67,8 @@
 
   });
 
+
+  
  //  C O N N E C T I N G   T O   T H E   S E R V E R
 
   let port = process.env.PORT || 3000;

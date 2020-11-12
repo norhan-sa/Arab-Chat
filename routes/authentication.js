@@ -36,11 +36,10 @@
    let salt = await bcrypt.genSalt(10);
    let hashedPass = await bcrypt.hash(password,salt);
 
-   let my_token = generateToken({member: name});
+   let my_token = generateToken({name: name});
 
-   let member = new Members({name: name , decoration: name, password: hashedPass , last_ip: data.info.ip , last_device: device_id , device_id: device_id, last_login: new Date() , token: token , reg_date: new Date()});
+   let member = new Members({type: 'عضو' ,name: name , decoration: name, password: hashedPass , last_ip: data.info.ip , last_device: device_id , device_id: device_id, last_login: new Date() , token: token , reg_date: new Date()});
    let save_user = await member.save()
-   data.info.id =  save_user.id;
 
    insertToLogs('تسجيل عضوية', data.info);
 
@@ -66,15 +65,13 @@
      let {name , password , device_id} = req.body;
      if(!(name && password && device_id)) return res.status(400).send({msg:"الرجاء التحقق من البيانات المدخلة" ,data:null ,status:'400'});
 
-     let user  =  await Members.findOne({name: name}).populate('sub');
+     let user  =  await Members.findOne({name: name}).populate('sub').select('-last_device -last_ip -last_login -device_id');
      if( !user ) return res.status(400).send({msg:'أنت مخطئ في اسم المستخدم', data:null , status:'400'});
 
      let data = await getUserData(req);
      data.info.name = name;
      data.info.decoration = user.decoration;
-     data.info.id = user.id;
-     data.info.device_id = device_id,
-     data.info.token = user.token;
+     data.info.device_id = device_id;
 
      let is_blocked  = await Blocks.find({$or:[{ip: data.info.ip},{device_id: device_id},{country_code: data.info.code},{os: data.os},{browser: data.browser}]});
      if(is_blocked.length != 0) {
@@ -85,19 +82,19 @@
      let result = await bcrypt.compare(password , user.password);
      if(!result) return res.status(400).send({msg:'أنت مخطئ في كلمة المرور' , data: null , status:'400'});
 
-     let token = generateToken({member: name});
+     let token = generateToken({name: name});
 
      let roles = null;
      if(user.sub) roles = user.sub.roles;
      data.info.roles = roles;
      data.info.device_id = device_id;
 
-     Members.findOneAndUpdate({id: user.id},{ last_ip: data.info.ip , last_device: device_id , device_id: device_id, last_login: new Date() })
+     Members.findOneAndUpdate({id: user.id},{ last_ip: data.info.ip , last_device: data.info.device_type , device_id: device_id, last_login: new Date() })
      .catch((err)=>console.log(err.stack));
 
      insertToLogs('دخول العضو', data.info);
 
-     return res.send({msg:'تم تسجيل الدخول بنجاح', data:data.info, token: token, status:200});
+     return res.send({msg:'تم تسجيل الدخول بنجاح', data:{user: user , loginInfo: data.info}, token: token, status:200});
      
    }catch(err){
 
@@ -123,6 +120,8 @@
 
     let data = await getUserData(req);
     data.info.name = name;
+    data.info.decoration = name;
+    data.info.device_id = device_id;
 
     let is_blocked  = await Blocks.find({$or:[{ip: data.info.ip},{device_id: device_id},{country_code: data.info.code},{os: data.os},{browser: data.browser}]});
     if(is_blocked.length != 0) {
@@ -132,15 +131,16 @@
 
     insertToLogs('دخول الزائر', data.info);
 
-    let my_token = generateToken({visitor: name});
+    let my_token = generateToken({name: name});
+
+    let member = new Members({type: 'زائر',name: name , decoration: name, last_ip: data.info.ip , last_device: data.info.device_type , device_id: device_id, last_login: new Date()});
+    member.save().catch(err=>console.log(err.stack));   
 
     return res.send({msg:'تم دخول الزائر بنجاح', data:data.info , token: my_token , status:'200'});
 
   }catch(err){
-
       console.log(err.stack);
       return res.status(500).send({msg:'حدث خطا ما', data: null , status:'500'});   
-
   }
 
   });

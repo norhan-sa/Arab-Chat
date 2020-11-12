@@ -4,6 +4,9 @@
  const AutoIncrement  =   require('mongoose-sequence')(mongoose);
 
  const users_schema = new Schema({
+   type:{
+     type: String
+   },
    name:{
      type: String,
      unique : true,
