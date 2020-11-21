@@ -19,8 +19,7 @@
      type: String 
    },
    password: {
-     type: String,
-     required : true        
+     type: String
    },
    muted: {
      type: Boolean      
