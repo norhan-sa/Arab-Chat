@@ -18,10 +18,17 @@
     nsp.on('connection', socket=>{
        
       console.log(`U S E R  C O N N E C T E D  ${socket.id}`);
+      
+    // G E T   A C T I V E   U S E R S
+      socket.on('active_users',()=>{
+        socket.emit('active_users',active_users);
+      });
+    
     // TAKE USER DATA
       socket.on('data',data=>{   
         let user = find_user_byname(data.name);
         if(user){
+          nsp.sockets.sockets[user.socket].disconnect();
           active_users[user.index].socket = socket.id;
         }else{
           data.socket = socket.id;

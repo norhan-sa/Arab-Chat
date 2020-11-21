@@ -7,13 +7,14 @@
  const    Site    =    require('./models/wesite');
  const {joinChat,main_chat}  =    require('./chat');
 
- let site_data = {};
+ let site_data = [];
 
-  Site.findOne({id:1}).then(i=>{
-    console.log(site_data);
-    site_data = i ;
-    console.log(site_data);
-  }).catch(err=>console.log(err.message));
+ async function find_data(){
+   let data = await Site.findOne({id:1});
+   site_data.push(data);
+ }
+
+ find_data();
 
   let nsp = io.of('/main'); 
   main_chat(nsp);
@@ -85,4 +86,5 @@
     console.log(`Listening to port ${port} . . . `);
   });
 
- module.exports = site_data;
+
+ exports.site_data = site_data;

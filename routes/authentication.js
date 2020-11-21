@@ -11,6 +11,7 @@
  let    site_data     =    require('../server');
  
  
+ 
  // R E G E S T R A T I O N
 
  router.post('/reg', async(req, res)=>{
@@ -20,12 +21,12 @@
    let {name , password , device_id , token} = req.body;
    if(!(name && password && device_id && token)) return res.status(400).send({msg:"الرجاء التحقق من البيانات المدخلة" ,data:null ,status:'400'}); 
 
-  //  if(!site_data.allow_reg)
-  //   return res.status(400).send({msg: 'غير مسموح تسجيل أعضاء', data: null , status:'400'});
+   if(!site_data.site_data[0].allow_reg)
+   return res.status(400).send({msg: 'غير مسموح تسجيل أعضاء جدد', data: null , status:'400'});
 
-  //  if( name.length !== site_data.reg_name_letters )
-  //   return res.status(400).send({msg: `عدد الحروف المسموح بها ${site_data.reg_name_letters}`, data: null , status:'400'});
-
+   if( name.length !== site_data.site_data[0].reg_name_letters )
+   return res.status(400).send({msg: `عدد الحروف المسموح بها ${site_data.site_data[0].reg_name_letters}`, data: null , status:'400'});
+ 
    let data = await getUserData(req);
    data.info.name = name;
    data.info.decoration = name;
@@ -116,12 +117,12 @@
 
     let {name , device_id } = req.body;
     if(!(name && device_id)) return res.status(400).send({msg:"الرجاء التحقق من البيانات المدخلة" ,data:null ,status:'400'});
-    // console.log(site_data);
-    // if(!site_data[0].allow_visitors)
-    // return res.status(400).send({msg: 'غير مسموح دخول الزوار', data: null , status:'400'});
+ 
+    if(!site_data.site_data[0].allow_visitors)
+    return res.status(400).send({msg: 'غير مسموح دخول الزوار', data: null , status:'400'});
 
-    // if( name.length !== site_data[0].visitor_name_letters )
-    // return res.status(400).send({msg: `عدد الحروف المسموح بها ${site_data.visitor_name_letters}`, data: null , status:'400'});
+    if( name.length !== site_data.site_data[0].visitor_name_letters )
+    return res.status(400).send({msg: `عدد الحروف المسموح بها ${site_data.site_data[0].visitor_name_letters}`, data: null , status:'400'});
   
     let isMember = await Members.findOne({$or: [{name: name},{decoration: name}]});
     if( isMember ) return res.status(400).send({msg:'هذا الإسم مسجل من قبل' , data:null , status:'400'});

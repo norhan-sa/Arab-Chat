@@ -17,6 +17,8 @@
  const   logout      =    require('./routes/logout');
  const   manage_site =    require('./routes/control panel/manage_site');
 
+ let site_data = null;
+
  app.use(express.json());
  app.use(express.static('public'));
 
@@ -51,7 +53,7 @@
  app.use('/',prof);
  app.use('/',logout);
  app.use('/',manage_site);
- app.get('/',(req,res)=>{
+ app.get('/',async(req,res)=>{
    let a = req.headers.referer;
    const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     return res.send('<h1><pre> W E L C O M E   T O  A R A B  C H A T </pre></h1>'+'\n\n\n'+a+'\n\n\n'+clientIp);
