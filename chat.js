@@ -1,11 +1,9 @@
 
  const  client  =   require('./config/redis');
- const  siofu   =   require("socketio-file-upload");
    
   let active_users = [];
   let rooms = [];
   let roomid = 0;
-
 
  //  C R E A T E   N E W   C H A T   R O O M
   function joinChat(nameSpace , name){
@@ -21,9 +19,10 @@
 
     // TAKE USER DATA
       socket.on('data',data=>{   
-        if(find_user_byname(data.name))
-          socket.emit('data',{msg:'العضو داخل الدردشة' , data: null , status:'400'});
-        else{
+        let user = find_user_byname(data.name);
+        if(user){
+          active_users[user.index].socket = socket.id;
+        }else{
           data.socket = socket.id;
           active_users.push(data);
         }
@@ -37,17 +36,18 @@
         ++roomid;
         socket.join(roomID);
         for(let i = 0 ; i < data.users.length ; ++i){
-          socket.to(data.users[i].id).emit('join room',{roomID: roomID , room_name: room_name , invitation_from: invitation_from });
+          let user = find_user_byname(users[i]);
+          socket.to(user.socket).emit('join room',{roomID: roomID , room_name: room_name , invitation_from: invitation_from });
         }
         socket.emit('create_room',{msg:"Room created",status:"200",data:{roomID: roomID , room_name: room_name }});       
      });
 
-    //  JOIN TO THE ROOM
+    // JOIN TO THE ROOM
      socket.on('join room', data=>{
        socket.join(data.roomID);
      });
 
-    //  GROUP CHAT
+    // GROUP CHAT
      socket.on('group_message', data=>{
        // data = {roomID: msg: from:}
        nsp.to(data.roomID).emit('group_message' , data);
@@ -55,20 +55,15 @@
 
     //  PRIVATE MESSAGINIG
      socket.on('private_message', data=>{
-        // data = { from: to: msg: toID: } 
-        let is_active = find_user_byname(data.to);  
-        if(is_active){
-          socket.emit('private_message',{data: data.msg , from: data.from , with: data.to , status:'200'});
-          socket.to(is_active.socket).emit('private_message',{data: data.msg , from: data.from , with: data.from , status:'200'});
-        }else{
-          socket.emit('private_message',{msg:'المستخدم غير نشط', status:'400'});
-        }  
-      });
-
-    //  SEND FILE AS PRIVATE MESSAGINIG 
-     socket.on('file_private_message', data=>{
- 
-      });
+      // data = { from: to: msg: toID: } 
+      let is_active = find_user_byname(data.to);  
+      if(is_active){
+        socket.emit('private_message',{data: data.msg , from: data.from , with: data.to , status:'200'});
+        socket.to(is_active.socket).emit('private_message',{data: data.msg , from: data.from , with: data.from , status:'200'});
+      }else{
+        socket.emit('private_message',{msg:'المستخدم غير نشط', status:'400'});
+      }  
+     });
       
     });
   }
@@ -77,8 +72,10 @@
 
   function find_user_byname(name) {
     for(let i = 0 ; i < active_users.length ; ++i){
-      if(active_users[i].name === name)
-       return active_users[i];
+      if(active_users[i].name === name){
+        active_users[i].index = i;
+        return active_users[i];
+      } 
     }
     return;
   }

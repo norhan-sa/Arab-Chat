@@ -106,11 +106,48 @@
 
    }catch(err){
       console.log(err.stack);
-      return res.status(500).send({msg:'حدث خطأ ما', data: result, status:'500'}); 
+      return res.status(500).send({msg:'حدث خطأ ما', data: null, status:'500'}); 
    }       
-}); 
+ }); 
 
+
+ //ـــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــــ
+
+ //    A D D   I M A G E   T O   T H E   W A L L
+
+
+//  router.post('/wall_media', upload.single('avatar') , auth , async(req,res)=>{
+
+//    try{
+
+//    let username;
+//    if(req.body.$name) username = req.body.$name;
+
+//    console.log(test);
+
+//    let result = await upload_private_file(file.path , file.mimetype , test+'');
+//    if(!result) return res.status(400).send({msg:'حدث خطأ ما', data:null , status:'400'});
+
+//    deleteFolder(file.path);
+
+//    ++test;
+   
+//     nsp.to(fromID).emit('private_message',{file: result , from: from , with: to , status:'200'});
+//     nsp.to(toID).emit('private_message',{file: result , from: from , with: from , status:'200'});
  
+//    res.send({msg: 'تم ارسال الصورة بنجاح', data:null, status:'200'});
+
+//    deleteFolder(file.path);
+
+//    res.end();
+
+//    }catch(err){
+//       console.log(err.stack);
+//       return res.status(500).send({msg:'حدث خطأ ما', data: null, status:'500'}); 
+//    }       
+//  });  
+
+
  //  D E L E T E   T H E   F O L D E R 
 
  function deleteFolder(file){
@@ -124,7 +161,6 @@
      } else  console.log(`${file} is deleted!`);
 
   });
-
  }
 
  module.exports = router;

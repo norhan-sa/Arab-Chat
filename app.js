@@ -15,6 +15,7 @@
  const    pic        =    require('./routes/profile/update_picture');
  const   prof        =    require('./routes/profile/update_profile');
  const   logout      =    require('./routes/logout');
+ const   manage_site =    require('./routes/control panel/manage_site');
 
  app.use(express.json());
  app.use(express.static('public'));
@@ -49,6 +50,7 @@
  app.use('/',pic);
  app.use('/',prof);
  app.use('/',logout);
+ app.use('/',manage_site);
  app.get('/',(req,res)=>{
    let a = req.headers.referer;
    const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;

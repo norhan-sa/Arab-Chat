@@ -29,7 +29,7 @@
 
    }catch(err){
      console.log(err.stack);
-     return res.status(500).send({msg:'حدث خطأ ما', data: result, status:'500'});   
+     return res.status(500).send({msg:'حدث خطأ ما', data: null, status:'500'});   
    } 
 
   });

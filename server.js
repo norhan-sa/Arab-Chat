@@ -4,10 +4,18 @@
  const     io     =    require('socket.io')(server);
  const    Rooms   =    require('./models/rooms');
  const   Members  =    require('./models/members');
- const  joinChat  =    require('./chat');
+ const    Site    =    require('./models/wesite');
+ const {joinChat,main_chat}  =    require('./chat');
 
- let nsp = io.of('/main'); 
- module.exports = nsp;
+ let site_data ;
+
+  Site.findOne({id:1}).then(i=>{
+    site_data = i;
+    console.log(site_data);
+  }).catch(err=>console.log(err.message));
+
+  let nsp = io.of('/main'); 
+  main_chat(nsp);
 
  //   C R E A T E   N E W   R O O M 
 
@@ -55,6 +63,7 @@
      connectedNameSpaceSockets.forEach(socketId => {
          MyNamespace.connected[socketId].disconnect(); // Disconnect Each socket
      });
+     
      MyNamespace.removeAllListeners(); // Remove all Listeners for the event emitter
      delete io.nsps['/my-namespace'];
 
@@ -66,8 +75,6 @@
      return res.send(`the ${roomName} is deleted successfully`);   
 
   });
-
-
   
  //  C O N N E C T I N G   T O   T H E   S E R V E R
 
@@ -77,4 +84,4 @@
     console.log(`Listening to port ${port} . . . `);
   });
 
-
+ module.exports = site_data;
