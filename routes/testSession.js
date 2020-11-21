@@ -2,6 +2,7 @@ const router = require("./authentication");
 const Members = require('../models/members');
 const bcrypt  = require('bcrypt');
 const Subscriptions  = require('../models/subscriptions');
+const Site = require('../models/wesite');
 
 const route = require('express').Router();
 
@@ -40,15 +41,37 @@ let a = [
   'إداره الموقع'
 ]
 
+let x = {
+  name:"test",
+  title:"test",
+  description:"test",
+  keywords:"test",
+  script:"",
+  template_color: "",
+  content_color:"",
+  buttons_color: "",
+  daily_msg_time: 0,
+  rooms_msgs_likes: 0,
+  wall_likes: 0,
+  wall_upload_likes: 0,
+  wall_upload_time: 0,
+  allow_visitors: true,
+  allow_reg: true,
+  update_data_likes: 0,
+  update_pic_likes: 0,
+  notification_likes: 0,
+  private_pic_likes: 0,
+  public_letters: 250,
+  private_letters: 250,
+  wall_letters: 250,
+  visitor_name_letters:5,
+  reg_name_letters: 5
+};
+
 route.get('/test1',async(req,res)=>{
-  let sub = await Subscriptions.findOne({name: 'chatmaster'});
-
-  let salt = await bcrypt.genSalt(10);
-  let hashedPass = await bcrypt.hash('1234567890',salt);
-
-  let mem = new Members({name: 'admin' , decoration: 'admin', password: hashedPass , reg_date: new Date() , sub: sub._id });
-  let r = await mem.save()
-  return res.send(r);
+  let site = new Site(x);
+  let m = await site.save();
+  return res.send(m);
 });
 
 module.exports = route;

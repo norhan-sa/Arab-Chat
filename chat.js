@@ -17,7 +17,7 @@
     
     nsp.on('connection', socket=>{
        
-      console.log(`U S E R  C O N N E C T E D  ${socket}`);
+      console.log(`U S E R  C O N N E C T E D  ${socket.id}`);
     // TAKE USER DATA
       socket.on('data',data=>{   
         let user = find_user_byname(data.name);
