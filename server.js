@@ -7,11 +7,11 @@
  const    Site    =    require('./models/wesite');
  const {joinChat,main_chat}  =    require('./chat');
 
- let site_data ;
+ let site_data = [];
 
   Site.findOne({id:1}).then(i=>{
-    site_data = i;
-    console.log(site_data);
+    site_data[0] = i;
+    console.log(i);
   }).catch(err=>console.log(err.message));
 
   let nsp = io.of('/main'); 
