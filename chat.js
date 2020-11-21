@@ -16,7 +16,8 @@
   function main_chat(nsp){
     
     nsp.on('connection', socket=>{
-
+       
+      console.log(`U S E R  C O N N E C T E D  ${socket}`);
     // TAKE USER DATA
       socket.on('data',data=>{   
         let user = find_user_byname(data.name);
